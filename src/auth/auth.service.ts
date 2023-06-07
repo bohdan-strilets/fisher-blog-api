@@ -9,6 +9,7 @@ import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { RegistrationDto } from './dto/registration.dto';
 import { ResponseType } from './types/response.type';
 import { SendgridService } from 'src/sendgrid/sendgrid.service';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -62,6 +63,35 @@ export class AuthService {
       success: true,
       tokens,
       data: newUser,
+    };
+  }
+
+  async login(
+    loginDto: LoginDto,
+  ): Promise<ResponseType<TokenDocument, UserDocument> | ResponseType | undefined> {
+    const user = await this.UserModel.findOne({ email: loginDto.email });
+
+    if (!user || !bcrypt.compareSync(loginDto.password, user.password) || !user.isActivated) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.UNAUTHORIZED,
+          success: false,
+          message: 'Email or password is wrong or email is not activated.',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const payload = this.tokensService.createPayload(user);
+    const tokens = await this.tokensService.createTokens(payload);
+
+    return {
+      status: 'success',
+      code: HttpStatus.CREATED,
+      success: true,
+      tokens,
+      data: user,
     };
   }
 }

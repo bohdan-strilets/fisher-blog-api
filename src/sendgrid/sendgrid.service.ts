@@ -24,7 +24,7 @@ export class SendgridService {
       subject: 'Account activation by Fishing blog',
       html: `
           <div>
-            <h1>Welcome to Code labyrinth</h1>
+            <h1>Welcome to Fishing blog</h1>
             <br />
             <p>Thank you for registering on our site! To start using your account, please confirm its activation by clicking on the link below:</p>
             <br />
@@ -41,7 +41,7 @@ export class SendgridService {
   resetPassword(email: string, name: string) {
     return {
       to: email,
-      subject: 'Password reset by Code Labyrinth',
+      subject: 'Password reset by Fishing blog',
       html: `
           <div>
             <h1>Hello ${name}!</h1>

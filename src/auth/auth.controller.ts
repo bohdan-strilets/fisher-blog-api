@@ -5,6 +5,7 @@ import { RegistrationDto } from './dto/registration.dto';
 import { Token } from 'src/tokens/schemas/token.schema';
 import { UserDocument } from 'src/users/schemas/user.schema';
 import { ResponseType } from './types/response.type';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -16,6 +17,16 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<ResponseType<Token, UserDocument> | ResponseType | undefined> {
     const data = await this.authService.registration(registrationDto);
+    res.cookie('refresh-token', data.tokens.refreshToken);
+    return data;
+  }
+
+  @Post('login')
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<ResponseType<Token, UserDocument> | ResponseType | undefined> {
+    const data = await this.authService.login(loginDto);
     res.cookie('refresh-token', data.tokens.refreshToken);
     return data;
   }

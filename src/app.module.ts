@@ -8,7 +8,7 @@ import { SendgridModule } from './sendgrid/sendgrid.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGODB_HOST),
     TokensModule,
     UsersModule,
