@@ -94,4 +94,41 @@ export class AuthService {
       data: user,
     };
   }
+
+  async logout(refreshToken: string): Promise<ResponseType | undefined> {
+    if (!refreshToken) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.UNAUTHORIZED,
+          success: false,
+          message: 'User is not unauthorized.',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const userData = this.tokensService.checkToken(refreshToken, 'refresh');
+    const tokenFromDb = await this.tokensService.findTokenFromDb(userData._id);
+
+    if (!userData || !tokenFromDb) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.UNAUTHORIZED,
+          success: false,
+          message: 'User is not unauthorized.',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    await this.TokenModel.findByIdAndRemove(tokenFromDb._id);
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
+    };
+  }
 }
