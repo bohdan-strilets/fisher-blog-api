@@ -1,0 +1,65 @@
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { v4 } from 'uuid';
+import * as bcrypt from 'bcrypt';
+import { Token, TokenDocument } from 'src/tokens/schemas/token.schema';
+import { TokensService } from 'src/tokens/tokens.service';
+import { User, UserDocument } from 'src/users/schemas/user.schema';
+import { RegistrationDto } from './dto/registration.dto';
+import { ResponseType } from './types/response.type';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    @InjectModel(User.name) private UserModel: Model<UserDocument>,
+    @InjectModel(Token.name) private TokenModel: Model<TokenDocument>,
+    private readonly tokensService: TokensService,
+  ) {}
+
+  async registration(
+    registrationDto: RegistrationDto,
+  ): Promise<ResponseType<TokenDocument, UserDocument> | ResponseType | undefined> {
+    const user = await this.UserModel.findOne({ email: registrationDto.email });
+
+    if (user) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.CONFLICT,
+          success: false,
+          message: 'This email in use, try other.',
+        },
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    const activationToken = v4();
+    const avatarURL =
+      'https://res.cloudinary.com/ddd1vgg5b/image/upload/v1686136075/fisher-blog-api/users/default/sitxbzjhzbuqetfukltz.jpg';
+    const posterURL =
+      'https://res.cloudinary.com/ddd1vgg5b/image/upload/v1686136075/fisher-blog-api/users/default/gbappjjj3ig1jvpvnqx5.jpg';
+    const password = bcrypt.hashSync(registrationDto.password, bcrypt.genSaltSync(10));
+
+    const newUser = await this.UserModel.create({
+      ...registrationDto,
+      activationToken,
+      avatarURL,
+      posterURL,
+      password,
+    });
+
+    const payload = this.tokensService.createPayload(newUser);
+    const tokens = await this.tokensService.createTokens(payload);
+    // const email = this.sendgridService.confirmEmail(newUser.email, newUser.activationToken);
+    // await this.sendgridService.sendEmail(email);
+
+    return {
+      status: 'success',
+      code: HttpStatus.CREATED,
+      success: true,
+      tokens,
+      data: newUser,
+    };
+  }
+}
