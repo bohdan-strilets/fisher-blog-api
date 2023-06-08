@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Post } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import * as fs from 'fs';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { PostDocument } from './schemas/post.schema';
 import { ResponseType } from './types/response.type';
@@ -98,6 +99,47 @@ export class PostsService {
     }
 
     const updatePost = await this.PostModel.findByIdAndUpdate(postId, updatePostDto, { new: true });
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
+      data: updatePost,
+    };
+  }
+
+  async uploadPoster(
+    file: Express.Multer.File,
+    postId: string,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const post = await this.PostModel.findById(postId);
+    const publicId = this.cloudinaryService.getPublicId(post.posterURL);
+
+    if (!post) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.NOT_FOUND,
+          success: false,
+          message: 'Post with current ID not found.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (!publicId.split('/').includes('default')) {
+      await this.cloudinaryService.deleteFile(post.posterURL, 'image');
+    }
+
+    const path = `fisher-blog-api/posts/posters/${postId}`;
+    const result = await this.cloudinaryService.uploadFile(file, 'image', path);
+    fs.unlinkSync(file.path);
+
+    const updatePost = await this.PostModel.findByIdAndUpdate(
+      postId,
+      { posterURL: result },
+      { new: true },
+    );
 
     return {
       status: 'success',

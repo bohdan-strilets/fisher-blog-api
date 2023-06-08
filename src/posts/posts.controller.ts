@@ -1,4 +1,17 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostDocument } from './schemas/post.schema';
 import { ResponseType } from './types/response.type';
@@ -6,6 +19,8 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AuthRequest } from 'src/users/types/auth-request.type';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { imageValidator } from 'src/users/pipes/image-validator.pipe';
 
 @Controller('posts')
 export class PostsController {
@@ -43,6 +58,19 @@ export class PostsController {
     @Param('postId') postId: string,
   ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
     const data = await this.postsService.updatePost(updatePostDto, postId);
+    return data;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('upload-poster/:postId')
+  @UseInterceptors(FileInterceptor('poster', { dest: './public' }))
+  async uploadPoster(
+    @UploadedFile(imageValidator)
+    file: Express.Multer.File,
+    @Param('postId') postId: string,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const data = await this.postsService.uploadPoster(file, postId);
     return data;
   }
 }
