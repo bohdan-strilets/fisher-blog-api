@@ -5,6 +5,7 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { PostDocument } from './schemas/post.schema';
 import { ResponseType } from './types/response.type';
 import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -77,6 +78,32 @@ export class PostsService {
       code: HttpStatus.CREATED,
       success: true,
       data: newPost,
+    };
+  }
+
+  async updatePost(
+    updatePostDto: UpdatePostDto,
+    postId: string,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    if (!updatePostDto) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.BAD_REQUEST,
+          success: false,
+          message: 'Check correct entered data.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const updatePost = await this.PostModel.findByIdAndUpdate(postId, updatePostDto, { new: true });
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
+      data: updatePost,
     };
   }
 }

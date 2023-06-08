@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostDocument } from './schemas/post.schema';
 import { ResponseType } from './types/response.type';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AuthRequest } from 'src/users/types/auth-request.type';
 import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -32,6 +33,16 @@ export class PostsController {
   ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
     const { _id } = req.user;
     const data = await this.postsService.createPost(createPostDto, _id);
+    return data;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('update-post/:postId')
+  async updatePost(
+    @Body() updatePostDto: UpdatePostDto,
+    @Param('postId') postId: string,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const data = await this.postsService.updatePost(updatePostDto, postId);
     return data;
   }
 }
