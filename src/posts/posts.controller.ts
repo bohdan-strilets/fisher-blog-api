@@ -73,4 +73,17 @@ export class PostsController {
     const data = await this.postsService.uploadPoster(file, postId);
     return data;
   }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('upload-image/:postId')
+  @UseInterceptors(FileInterceptor('image', { dest: './public' }))
+  async uploadImage(
+    @UploadedFile(imageValidator)
+    file: Express.Multer.File,
+    @Param('postId') postId: string,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const data = await this.postsService.uploadImage(file, postId);
+    return data;
+  }
 }

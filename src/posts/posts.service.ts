@@ -148,4 +148,26 @@ export class PostsService {
       data: updatePost,
     };
   }
+
+  async uploadImage(
+    file: Express.Multer.File,
+    postId: string,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const path = `fisher-blog-api/posts/images/${postId}`;
+    const result = await this.cloudinaryService.uploadFile(file, 'image', path);
+    fs.unlinkSync(file.path);
+
+    const updatePost = await this.PostModel.findByIdAndUpdate(
+      postId,
+      { $push: { imagesURL: result } },
+      { new: true },
+    );
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
+      data: updatePost,
+    };
+  }
 }
