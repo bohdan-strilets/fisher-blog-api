@@ -170,4 +170,26 @@ export class PostsService {
       data: updatePost,
     };
   }
+
+  async uploadVideo(
+    file: Express.Multer.File,
+    postId: string,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const path = `fisher-blog-api/posts/videos/${postId}`;
+    const result = await this.cloudinaryService.uploadFile(file, 'video', path);
+    fs.unlinkSync(file.path);
+
+    const updatePost = await this.PostModel.findByIdAndUpdate(
+      postId,
+      { $push: { videosURL: result } },
+      { new: true },
+    );
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
+      data: updatePost,
+    };
+  }
 }

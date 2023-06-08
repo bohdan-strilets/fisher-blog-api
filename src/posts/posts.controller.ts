@@ -21,6 +21,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { imageValidator } from 'src/users/pipes/image-validator.pipe';
+import { videoValidator } from 'src/users/pipes/video-validator.pipe';
 
 @Controller('posts')
 export class PostsController {
@@ -84,6 +85,19 @@ export class PostsController {
     @Param('postId') postId: string,
   ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
     const data = await this.postsService.uploadImage(file, postId);
+    return data;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('upload-video/:postId')
+  @UseInterceptors(FileInterceptor('video', { dest: './public' }))
+  async uploadVideo(
+    @UploadedFile(videoValidator)
+    file: Express.Multer.File,
+    @Param('postId') postId: string,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const data = await this.postsService.uploadVideo(file, postId);
     return data;
   }
 }
