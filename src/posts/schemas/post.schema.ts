@@ -7,7 +7,7 @@ import { CommentType } from '../types/comment.type';
 
 export type PostDocument = HydratedDocument<Post>;
 
-@Schema({ versionKey: false, timestamps: true })
+@Schema({ versionKey: false, timestamps: true, collection: 'posts' })
 export class Post {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   owner: User;

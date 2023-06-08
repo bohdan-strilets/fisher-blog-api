@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable, Post } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { PostDocument } from './schemas/post.schema';
 import { ResponseType } from './types/response.type';
+import { CreatePostDto } from './dto/create-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -43,6 +44,39 @@ export class PostsService {
       code: HttpStatus.OK,
       success: true,
       data: post,
+    };
+  }
+
+  async createPost(
+    createPostDto: CreatePostDto,
+    userId: Types.ObjectId,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    if (!createPostDto) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.BAD_REQUEST,
+          success: false,
+          message: 'Check correct entered data.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const posterURL =
+      'https://res.cloudinary.com/ddd1vgg5b/image/upload/v1686231559/fisher-blog-api/posts/default/tfwv2iytx6aisquz4yj8.jpg';
+
+    const newPost = await this.PostModel.create({
+      ...createPostDto,
+      owner: userId,
+      posterURL,
+    });
+
+    return {
+      status: 'success',
+      code: HttpStatus.CREATED,
+      success: true,
+      data: newPost,
     };
   }
 }
