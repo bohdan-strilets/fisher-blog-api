@@ -100,4 +100,13 @@ export class PostsController {
     const data = await this.postsService.uploadVideo(file, postId);
     return data;
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('update-public/:postId')
+  async updatePublic(
+    @Param('postId') postId: string,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const data = await this.postsService.updatePublic(postId);
+    return data;
+  }
 }
