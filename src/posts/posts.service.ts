@@ -223,4 +223,33 @@ export class PostsService {
       data: updatePost,
     };
   }
+
+  async viewPost(postId: string): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const post = await this.PostModel.findOne({ _id: postId });
+
+    if (!post) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.NOT_FOUND,
+          success: false,
+          message: 'Post with current ID not found.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const updatePost = await this.PostModel.findByIdAndUpdate(
+      post._id,
+      { $inc: { 'statistics.numberViews': 1 } },
+      { new: true },
+    );
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
+      data: updatePost,
+    };
+  }
 }

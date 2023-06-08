@@ -109,4 +109,12 @@ export class PostsController {
     const data = await this.postsService.updatePublic(postId);
     return data;
   }
+
+  @Get('view-post/:postId')
+  async viewPost(
+    @Param('postId') postId: string,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const data = await this.postsService.viewPost(postId);
+    return data;
+  }
 }
