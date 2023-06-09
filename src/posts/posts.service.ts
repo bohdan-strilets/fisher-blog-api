@@ -252,4 +252,47 @@ export class PostsService {
       data: updatePost,
     };
   }
+
+  async likePost(
+    postId: string,
+    userId: Types.ObjectId,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const post = await this.PostModel.findOne({ _id: postId });
+
+    if (!post) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.NOT_FOUND,
+          success: false,
+          message: 'Post with current ID not found.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const isLikes = post.likes.find(item => item === userId);
+    let updatePost: PostDocument;
+
+    if (!isLikes) {
+      updatePost = await this.PostModel.findByIdAndUpdate(
+        postId,
+        { $push: { likes: userId }, $inc: { 'statistics.numberLikes': 1 } },
+        { new: true },
+      );
+    } else {
+      updatePost = await this.PostModel.findByIdAndUpdate(
+        postId,
+        { $pull: { likes: userId }, $inc: { 'statistics.numberLikes': -1 } },
+        { new: true },
+      );
+    }
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
+      data: updatePost,
+    };
+  }
 }

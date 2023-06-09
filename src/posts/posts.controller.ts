@@ -117,4 +117,15 @@ export class PostsController {
     const data = await this.postsService.viewPost(postId);
     return data;
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('like-post/:postId')
+  async likePost(
+    @Param('postId') postId: string,
+    @Req() req: AuthRequest,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const { _id } = req.user;
+    const data = await this.postsService.likePost(postId, _id);
+    return data;
+  }
 }

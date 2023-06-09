@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { User } from 'src/users/schemas/user.schema';
 import { PostBodyType } from '../types/post-body.type';
 import { Statistics, StatisticsDocument } from './statistics.schema';
@@ -41,6 +41,9 @@ export class Post {
 
   @Prop({ default: true })
   isPublic: boolean;
+
+  @Prop({ default: [] })
+  likes: Types.ObjectId[];
 
   @Prop()
   createdAt: Date;
