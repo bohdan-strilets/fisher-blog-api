@@ -12,4 +12,5 @@ export type PostBodyType = {
   lineType?: 'solid' | 'dotted' | 'dashed' | 'double';
   listType?: 'marked' | 'numbered';
   listItems?: string[];
+  videoSize?: number;
 };

@@ -7,6 +7,7 @@ import { PostDocument } from './schemas/post.schema';
 import { ResponseType } from './types/response.type';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import averageReadingTime from './helpers/average-reading-time';
 
 @Injectable()
 export class PostsService {
@@ -65,6 +66,7 @@ export class PostsService {
       );
     }
 
+    const readingTime = averageReadingTime(createPostDto.body);
     const posterURL =
       'https://res.cloudinary.com/ddd1vgg5b/image/upload/v1686231559/fisher-blog-api/posts/default/tfwv2iytx6aisquz4yj8.jpg';
 
@@ -72,6 +74,9 @@ export class PostsService {
       ...createPostDto,
       owner: userId,
       posterURL,
+      statistics: {
+        readingTime,
+      },
     });
 
     return {
@@ -99,12 +104,18 @@ export class PostsService {
     }
 
     const updatePost = await this.PostModel.findByIdAndUpdate(postId, updatePostDto, { new: true });
+    const readingTime = averageReadingTime(updatePost.body);
+    const result = await this.PostModel.findByIdAndUpdate(
+      postId,
+      { statistics: { readingTime } },
+      { new: true },
+    );
 
     return {
       status: 'success',
       code: HttpStatus.OK,
       success: true,
-      data: updatePost,
+      data: result,
     };
   }
 
