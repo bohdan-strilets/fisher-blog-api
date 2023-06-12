@@ -1,9 +1,9 @@
-import { HttpException, HttpStatus, Injectable, Post } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as fs from 'fs';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { PostDocument } from './schemas/post.schema';
+import { PostDocument, Post } from './schemas/post.schema';
 import { ResponseType } from './types/response.type';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
