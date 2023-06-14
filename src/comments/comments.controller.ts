@@ -3,9 +3,8 @@ import { CommentsService } from './comments.service';
 import { ResponseType } from './types/response.type';
 import { CommentDocument } from './schemas/comment.schema';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CreateCommentDto } from './dto/create-comment.dto';
+import { CommentDto } from './dto/comment.dto';
 import { AuthRequest } from 'src/users/types/auth-request.type';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Controller('comments')
 export class CommentsController {
@@ -23,7 +22,7 @@ export class CommentsController {
   @Post('create-comment/:postId')
   async createComment(
     @Param('postId') postId: string,
-    @Body() createCommentDto: CreateCommentDto,
+    @Body() createCommentDto: CommentDto,
     @Req() req: AuthRequest,
   ): Promise<ResponseType<CommentDocument> | ResponseType | undefined> {
     const { _id } = req.user;
@@ -35,7 +34,7 @@ export class CommentsController {
   @Patch('update-comment/:postId/:commentId')
   async updateComment(
     @Param('commentId') commentId: string,
-    @Body() updateCommentDto: UpdateCommentDto,
+    @Body() updateCommentDto: CommentDto,
   ): Promise<ResponseType<CommentDocument> | ResponseType | undefined> {
     const data = await this.commentsService.updateComment(commentId, updateCommentDto);
     return data;

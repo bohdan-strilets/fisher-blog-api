@@ -2,17 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CommentDocument, Comment } from './schemas/comment.schema';
-import { Post, PostDocument } from 'src/posts/schemas/post.schema';
 import { ResponseType } from './types/response.type';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import { CommentDto } from './dto/comment.dto';
 
 @Injectable()
 export class CommentsService {
-  constructor(
-    @InjectModel(Comment.name) private CommentModel: Model<CommentDocument>,
-    @InjectModel(Post.name) private PostModel: Model<PostDocument>,
-  ) {}
+  constructor(@InjectModel(Comment.name) private CommentModel: Model<CommentDocument>) {}
 
   async getAllComments(
     postId: string,
@@ -42,7 +37,7 @@ export class CommentsService {
   async createComment(
     postId: string,
     userId: Types.ObjectId,
-    createCommentDto: CreateCommentDto,
+    createCommentDto: CommentDto,
   ): Promise<ResponseType<CommentDocument> | ResponseType | undefined> {
     if (!createCommentDto) {
       throw new HttpException(
@@ -72,7 +67,7 @@ export class CommentsService {
 
   async updateComment(
     commentId: string,
-    updateCommentDto: UpdateCommentDto,
+    updateCommentDto: CommentDto,
   ): Promise<ResponseType<CommentDocument> | ResponseType | undefined> {
     if (!updateCommentDto) {
       throw new HttpException(
