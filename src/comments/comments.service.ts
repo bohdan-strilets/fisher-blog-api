@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CommentDocument, Comment } from './schemas/comment.schema';
 import { Post, PostDocument } from 'src/posts/schemas/post.schema';
 import { ResponseType } from './types/response.type';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class CommentsService {
@@ -34,6 +35,37 @@ export class CommentsService {
       code: HttpStatus.OK,
       success: true,
       data: comments,
+    };
+  }
+
+  async createComment(
+    postId: string,
+    userId: Types.ObjectId,
+    createCommentDto: CreateCommentDto,
+  ): Promise<ResponseType<CommentDocument> | ResponseType | undefined> {
+    if (!CreateCommentDto) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.BAD_REQUEST,
+          success: false,
+          message: 'Check correct entered data.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const newComment = await this.CommentModel.create({
+      ...createCommentDto,
+      post: postId,
+      author: userId,
+    });
+
+    return {
+      status: 'success',
+      code: HttpStatus.CREATED,
+      success: true,
+      data: newComment,
     };
   }
 }
