@@ -8,11 +8,13 @@ import { ResponseType } from './types/response.type';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import averageReadingTime from './helpers/average-reading-time';
+import { CommentDocument, Comment } from 'src/comments/schemas/comment.schema';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectModel(Post.name) private PostModel: Model<PostDocument>,
+    @InjectModel(Comment.name) private CommentModel: Model<CommentDocument>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
@@ -304,6 +306,47 @@ export class PostsService {
       code: HttpStatus.OK,
       success: true,
       data: updatePost,
+    };
+  }
+
+  async deletePost(postId: string): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    if (!postId) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.NOT_FOUND,
+          success: false,
+          message: 'Post with current ID not found.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const deletePost = await this.PostModel.findByIdAndRemove(postId);
+    await this.CommentModel.deleteMany({ post: postId });
+
+    const posterPublicId = this.cloudinaryService.getPublicId(deletePost.posterURL);
+
+    if (!posterPublicId.split('/').includes('default')) {
+      await this.cloudinaryService.deleteFile(deletePost.posterURL, 'image');
+      await this.cloudinaryService.deleteFolder(`fisher-blog-api/posts/posters/${postId}`);
+    }
+
+    deletePost.imagesURL.map(async item => {
+      await this.cloudinaryService.deleteFile(item, 'image');
+      await this.cloudinaryService.deleteFolder(`fisher-blog-api/posts/images/${postId}`);
+    });
+
+    deletePost.videosURL.map(async item => {
+      await this.cloudinaryService.deleteFile(item, 'video');
+      await this.cloudinaryService.deleteFolder(`fisher-blog-api/posts/videos/${postId}`);
+    });
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
+      data: deletePost,
     };
   }
 }

@@ -11,6 +11,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  Delete,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostDocument } from './schemas/post.schema';
@@ -126,6 +127,15 @@ export class PostsController {
   ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
     const { _id } = req.user;
     const data = await this.postsService.likePost(postId, _id);
+    return data;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('delete-post/:postId')
+  async deletePost(
+    @Param('postId') postId: string,
+  ): Promise<ResponseType<PostDocument> | ResponseType | undefined> {
+    const data = await this.postsService.deletePost(postId);
     return data;
   }
 }
