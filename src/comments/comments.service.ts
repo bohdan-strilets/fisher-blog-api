@@ -126,4 +126,47 @@ export class CommentsService {
       success: true,
     };
   }
+
+  async likeComment(
+    commentId: string,
+    userId: Types.ObjectId,
+  ): Promise<ResponseType<CommentDocument> | ResponseType | undefined> {
+    const comment = await this.CommentModel.findOne({ _id: commentId });
+
+    if (!comment) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.NOT_FOUND,
+          success: false,
+          message: 'Comment with current ID not found.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const isLikes = comment.likes.find(item => item === userId);
+    let updateComment: CommentDocument;
+
+    if (!isLikes) {
+      updateComment = await this.CommentModel.findByIdAndUpdate(
+        commentId,
+        { $push: { likes: userId }, $inc: { numberLikes: 1 } },
+        { new: true },
+      );
+    } else {
+      updateComment = await this.CommentModel.findByIdAndUpdate(
+        commentId,
+        { $pull: { likes: userId }, $inc: { numberLikes: -1 } },
+        { new: true },
+      );
+    }
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
+      data: updateComment,
+    };
+  }
 }

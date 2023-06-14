@@ -16,6 +16,9 @@ export class Comment {
   @Prop({ required: true })
   text: string;
 
+  @Prop({ default: [] })
+  likes: Types.ObjectId[];
+
   @Prop({ default: 0 })
   numberLikes: number;
 

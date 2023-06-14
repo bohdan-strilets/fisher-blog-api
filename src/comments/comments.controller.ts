@@ -31,7 +31,7 @@ export class CommentsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('update-comment/:postId/:commentId')
+  @Patch('update-comment/:commentId')
   async updateComment(
     @Param('commentId') commentId: string,
     @Body() updateCommentDto: CommentDto,
@@ -41,9 +41,20 @@ export class CommentsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('delete-comment/:postId/:commentId')
+  @Delete('delete-comment/:commentId')
   async deleteComment(@Param('commentId') commentId: string): Promise<ResponseType | undefined> {
     const data = await this.commentsService.deleteComment(commentId);
+    return data;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('like-comment/:commentId')
+  async likeComment(
+    @Param('commentId') commentId: string,
+    @Req() req: AuthRequest,
+  ): Promise<ResponseType<CommentDocument> | ResponseType | undefined> {
+    const { _id } = req.user;
+    const data = await this.commentsService.likeComment(commentId, _id);
     return data;
   }
 }
