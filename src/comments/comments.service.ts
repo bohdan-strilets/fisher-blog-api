@@ -81,6 +81,18 @@ export class CommentsService {
       );
     }
 
+    if (!commentId) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.UNAUTHORIZED,
+          success: false,
+          message: 'Comment with current ID not found.',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
     const updateComment = await this.CommentModel.findByIdAndUpdate(commentId, updateCommentDto, {
       new: true,
     });
@@ -90,6 +102,28 @@ export class CommentsService {
       code: HttpStatus.OK,
       success: true,
       data: updateComment,
+    };
+  }
+
+  async deleteComment(commentId: string): Promise<ResponseType | undefined> {
+    if (!commentId) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.UNAUTHORIZED,
+          success: false,
+          message: 'Comment with current ID not found.',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    await this.CommentModel.findByIdAndRemove(commentId);
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
     };
   }
 }

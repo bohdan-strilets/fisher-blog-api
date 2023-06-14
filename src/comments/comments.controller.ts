@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards, Patch, Delete } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { ResponseType } from './types/response.type';
 import { CommentDocument } from './schemas/comment.schema';
@@ -37,6 +37,13 @@ export class CommentsController {
     @Body() updateCommentDto: CommentDto,
   ): Promise<ResponseType<CommentDocument> | ResponseType | undefined> {
     const data = await this.commentsService.updateComment(commentId, updateCommentDto);
+    return data;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('delete-comment/:postId/:commentId')
+  async deleteComment(@Param('commentId') commentId: string): Promise<ResponseType | undefined> {
+    const data = await this.commentsService.deleteComment(commentId);
     return data;
   }
 }
