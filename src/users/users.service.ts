@@ -13,14 +13,22 @@ import { EmailDto } from './dto/email.dto';
 import { ChangeProfileDto } from './dto/change-profile.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { Post, PostDocument } from 'src/posts/schemas/post.schema';
+import { Comment, CommentDocument } from 'src/comments/schemas/comment.schema';
+import { CommentsService } from 'src/comments/comments.service';
+import { PostsService } from 'src/posts/posts.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private UserModel: Model<UserDocument>,
     @InjectModel(Token.name) private TokenModel: Model<TokenDocument>,
+    @InjectModel(Post.name) private PostModel: Model<PostDocument>,
+    @InjectModel(Comment.name) private CommentModel: Model<CommentDocument>,
     private readonly sendgridService: SendgridService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly commentsService: CommentsService,
+    private readonly postService: PostsService,
   ) {}
 
   async activationEmail(activationToken: string): Promise<ResponseType | undefined> {
@@ -368,6 +376,16 @@ export class UsersService {
       await this.cloudinaryService.deleteFile(user.posterURL, 'image');
       await this.cloudinaryService.deleteFolder(`fisher-blog-api/users/posters/${userId}`);
     }
+
+    const posts = await this.PostModel.find({ owner: userId });
+    posts.map(async item => {
+      await this.postService.deletePost(item._id.toString());
+    });
+
+    const comments = await this.CommentModel.find({ author: userId });
+    comments.map(async item => {
+      await this.commentsService.deleteComment(item._id.toString(), item.post.toString());
+    });
 
     return {
       status: 'success',

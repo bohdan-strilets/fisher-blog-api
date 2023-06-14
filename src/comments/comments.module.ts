@@ -14,5 +14,6 @@ import { Post, PostSchema } from 'src/posts/schemas/post.schema';
   ],
   controllers: [CommentsController],
   providers: [CommentsService],
+  exports: [CommentsService],
 })
 export class CommentsModule {}

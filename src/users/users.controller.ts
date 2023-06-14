@@ -13,6 +13,7 @@ import {
   Patch,
   UploadedFile,
   UseInterceptors,
+  Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ResponseType } from './types/response.type';
@@ -141,7 +142,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('remove-profile')
+  @Delete('remove-profile')
   async removeProfile(@Req() req: AuthRequest): Promise<ResponseType | undefined> {
     const { _id } = req.user;
     const data = await this.usersService.removeProfile(_id);
