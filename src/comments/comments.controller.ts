@@ -41,9 +41,12 @@ export class CommentsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('delete-comment/:commentId')
-  async deleteComment(@Param('commentId') commentId: string): Promise<ResponseType | undefined> {
-    const data = await this.commentsService.deleteComment(commentId);
+  @Delete('delete-comment/:postId/:commentId')
+  async deleteComment(
+    @Param('commentId') commentId: string,
+    @Param('postId') postId: string,
+  ): Promise<ResponseType | undefined> {
+    const data = await this.commentsService.deleteComment(commentId, postId);
     return data;
   }
 

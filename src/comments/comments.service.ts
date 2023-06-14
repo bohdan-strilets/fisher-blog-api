@@ -4,10 +4,14 @@ import { Model, Types } from 'mongoose';
 import { CommentDocument, Comment } from './schemas/comment.schema';
 import { ResponseType } from './types/response.type';
 import { CommentDto } from './dto/comment.dto';
+import { Post, PostDocument } from 'src/posts/schemas/post.schema';
 
 @Injectable()
 export class CommentsService {
-  constructor(@InjectModel(Comment.name) private CommentModel: Model<CommentDocument>) {}
+  constructor(
+    @InjectModel(Comment.name) private CommentModel: Model<CommentDocument>,
+    @InjectModel(Post.name) private PostModel: Model<PostDocument>,
+  ) {}
 
   async getAllComments(
     postId: string,
@@ -57,6 +61,8 @@ export class CommentsService {
       author: userId,
     });
 
+    await this.PostModel.findByIdAndUpdate(postId, { $inc: { 'statistics.numberComments': 1 } });
+
     return {
       status: 'success',
       code: HttpStatus.CREATED,
@@ -105,7 +111,7 @@ export class CommentsService {
     };
   }
 
-  async deleteComment(commentId: string): Promise<ResponseType | undefined> {
+  async deleteComment(commentId: string, postId: string): Promise<ResponseType | undefined> {
     if (!commentId) {
       throw new HttpException(
         {
@@ -119,6 +125,9 @@ export class CommentsService {
     }
 
     await this.CommentModel.findByIdAndRemove(commentId);
+    await this.PostModel.findByIdAndUpdate(postId, {
+      $inc: { 'statistics.numberComments': -1 },
+    });
 
     return {
       status: 'success',
