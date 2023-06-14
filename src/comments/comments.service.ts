@@ -5,6 +5,7 @@ import { CommentDocument, Comment } from './schemas/comment.schema';
 import { Post, PostDocument } from 'src/posts/schemas/post.schema';
 import { ResponseType } from './types/response.type';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Injectable()
 export class CommentsService {
@@ -43,7 +44,7 @@ export class CommentsService {
     userId: Types.ObjectId,
     createCommentDto: CreateCommentDto,
   ): Promise<ResponseType<CommentDocument> | ResponseType | undefined> {
-    if (!CreateCommentDto) {
+    if (!createCommentDto) {
       throw new HttpException(
         {
           status: 'error',
@@ -66,6 +67,34 @@ export class CommentsService {
       code: HttpStatus.CREATED,
       success: true,
       data: newComment,
+    };
+  }
+
+  async updateComment(
+    commentId: string,
+    updateCommentDto: UpdateCommentDto,
+  ): Promise<ResponseType<CommentDocument> | ResponseType | undefined> {
+    if (!updateCommentDto) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.BAD_REQUEST,
+          success: false,
+          message: 'Check correct entered data.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const updateComment = await this.CommentModel.findByIdAndUpdate(commentId, updateCommentDto, {
+      new: true,
+    });
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
+      data: updateComment,
     };
   }
 }
