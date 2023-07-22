@@ -72,7 +72,7 @@ export class UsersService {
     }
 
     const activationToken = v4();
-    const mail = this.sendgridService.confirmEmail(user.email, user.activationToken);
+    const mail = this.sendgridService.confirmEmail(user.email, activationToken);
     await this.sendgridService.sendEmail(mail);
     await this.UserModel.findByIdAndUpdate(user._id, { isActivated: false, activationToken });
 
