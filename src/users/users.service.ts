@@ -233,14 +233,11 @@ export class UsersService {
     };
   }
 
-  async resetPassword(
-    resetPasswordDto: ResetPasswordDto,
-    userId: string,
-  ): Promise<ResponseType | undefined> {
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<ResponseType | undefined> {
     const password = bcrypt.hashSync(resetPasswordDto.password, bcrypt.genSaltSync(10));
-    const updateUser = await this.UserModel.findByIdAndUpdate(userId, { password }, { new: true });
+    const user = await this.UserModel.findOne({ email: resetPasswordDto.email });
 
-    if (!updateUser) {
+    if (!user) {
       throw new HttpException(
         {
           status: 'error',
@@ -251,6 +248,7 @@ export class UsersService {
         HttpStatus.NOT_FOUND,
       );
     }
+    await this.UserModel.findByIdAndUpdate(user._id, { password });
 
     return {
       status: 'success',

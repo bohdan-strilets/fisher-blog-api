@@ -93,12 +93,11 @@ export class UsersController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('reset-password/:userId')
+  @Post('reset-password')
   async resetPassword(
     @Body() resetPasswordDto: ResetPasswordDto,
-    @Param('userId') userId: string,
   ): Promise<ResponseType | undefined> {
-    const data = await this.usersService.resetPassword(resetPasswordDto, userId);
+    const data = await this.usersService.resetPassword(resetPasswordDto);
     return data;
   }
 
