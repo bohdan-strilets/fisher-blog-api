@@ -48,7 +48,7 @@ export class SendgridService {
             <br />
             <p>You received this email because you requested a password reset on our site. To reset your password, please follow the link below:</p>
             <br />
-            <a target="_blank" href="${process.env.CLIENT_URL}/reset-password">Link to password reset page</a>
+            <a target="_blank" href="${process.env.CLIENT_URI}/auth/restore-password">Link to password reset page</a>
             <br />
             <p>If you did not request a password reset, please ignore this message.<p/>
             <br />
