@@ -10,6 +10,7 @@ import { Post, PostSchema } from 'src/posts/schemas/post.schema';
 import { Comment, CommentSchema } from 'src/comments/schemas/comment.schema';
 import { CommentsModule } from 'src/comments/comments.module';
 import { PostsModule } from 'src/posts/posts.module';
+import { TokensModule } from 'src/tokens/tokens.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { PostsModule } from 'src/posts/posts.module';
     CloudinaryModule,
     CommentsModule,
     PostsModule,
+    TokensModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

@@ -17,6 +17,8 @@ import { Post, PostDocument } from 'src/posts/schemas/post.schema';
 import { Comment, CommentDocument } from 'src/comments/schemas/comment.schema';
 import { CommentsService } from 'src/comments/comments.service';
 import { PostsService } from 'src/posts/posts.service';
+import { TokensService } from 'src/tokens/tokens.service';
+import { TokensType } from 'src/tokens/types/tokens.type';
 
 @Injectable()
 export class UsersService {
@@ -29,6 +31,7 @@ export class UsersService {
     private readonly cloudinaryService: CloudinaryService,
     private readonly commentsService: CommentsService,
     private readonly postService: PostsService,
+    private readonly tokenService: TokensService,
   ) {}
 
   async activationEmail(activationToken: string): Promise<ResponseType | undefined> {
@@ -390,6 +393,46 @@ export class UsersService {
       code: HttpStatus.OK,
       success: true,
       message: 'Your account and all your data has been successfully deleted.',
+    };
+  }
+
+  async refreshUser(refreshToken: string): Promise<ResponseType<TokensType> | undefined> {
+    if (!refreshToken) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.UNAUTHORIZED,
+          success: false,
+          message: 'User not unauthorized.',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const userData = this.tokenService.checkToken(refreshToken, 'refresh');
+    const tokenFromDb = await this.tokenService.findTokenFromDb(userData._id);
+
+    if (!userData || !tokenFromDb) {
+      throw new HttpException(
+        {
+          status: 'error',
+          code: HttpStatus.UNAUTHORIZED,
+          success: false,
+          message: 'User not unauthorized.',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const user = await this.UserModel.findById(userData._id);
+    const payload = this.tokenService.createPayload(user);
+    const tokens = await this.tokenService.createTokens(payload);
+
+    return {
+      status: 'success',
+      code: HttpStatus.OK,
+      success: true,
+      tokens,
     };
   }
 }

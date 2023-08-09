@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import {
   Controller,
   Get,
@@ -14,6 +15,7 @@ import {
   UploadedFile,
   UseInterceptors,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ResponseType } from './types/response.type';
@@ -26,6 +28,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { imageValidator } from './pipes/image-validator.pipe';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { TokensType } from 'src/tokens/types/tokens.type';
 
 @Controller('users')
 export class UsersController {
@@ -145,6 +148,18 @@ export class UsersController {
   async removeProfile(@Req() req: AuthRequest): Promise<ResponseType | undefined> {
     const { _id } = req.user;
     const data = await this.usersService.removeProfile(_id);
+    return data;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('refresh-user')
+  async refreshUser(
+    @Req() req: AuthRequest,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<ResponseType<TokensType> | undefined> {
+    const refreshToken = req.cookies['refresh-token'];
+    const data = await this.usersService.refreshUser(refreshToken);
+    res.cookie('refresh-token', data.tokens.refreshToken);
     return data;
   }
 }
