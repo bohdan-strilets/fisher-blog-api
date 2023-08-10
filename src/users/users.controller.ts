@@ -151,7 +151,6 @@ export class UsersController {
     return data;
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('refresh-user')
   async refreshUser(
     @Req() req: AuthRequest,
